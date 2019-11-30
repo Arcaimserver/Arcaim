@@ -36,6 +36,7 @@
 #include "Vehicle.h"
 #include "WaypointManager.h"
 #include "World.h"
+#include "CreatureOutfit.h"
 
 ScriptMapMap sSpellScripts;
 ScriptMapMap sEventScripts;
@@ -1201,6 +1202,8 @@ void ObjectMgr::LoadEquipmentTemplates()
 
 CreatureModelInfo const* ObjectMgr::GetCreatureModelInfo(uint32 modelId)
 {
+    modelId = GetRealDisplayId(modelId);
+    
     CreatureModelContainer::const_iterator itr = _creatureModelStore.find(modelId);
     if (itr != _creatureModelStore.end())
         return &(itr->second);
@@ -1238,9 +1241,13 @@ void ObjectMgr::ChooseCreatureFlags(const CreatureTemplate* cinfo, uint32& npcfl
 
 CreatureModelInfo const* ObjectMgr::GetCreatureModelRandomGender(uint32* displayID)
 {
+    uint32 displayid_temp = GetRealDisplayId(*displayID);
+    if (displayid_temp != *displayID)
+        return GetCreatureModelRandomGender(&displayid_temp);
+    
     CreatureModelInfo const* modelInfo = GetCreatureModelInfo(*displayID);
     if (!modelInfo)
-        return NULL;
+        return nullptr;
 
     // If a model for another gender exists, 50% chance to use it
     if (modelInfo->modelid_other_gender != 0 && urand(0, 1) == 0)
@@ -9220,4 +9227,134 @@ void ObjectMgr::LoadCreatureQuestItems()
     while (result->NextRow());
 
     sLog->outString(">> Loaded %u creature quest items in %u ms", count, GetMSTimeDiffToNow(oldMSTime));
+}
+
+void ObjectMgr::LoadCreatureOutfits()
+{
+    uint32 oldMSTime = getMSTime();
+
+    _creatureOutfitStore.clear();
+
+    QueryResult result = WorldDatabase.Query("SELECT entry, npcsoundsid, race, class, gender, skin, face, hair, haircolor, facialhair, "
+        "head, shoulders, body, chest, waist, "
+        "legs, feet, wrists, hands, back, tabard, "
+        "guildid FROM creature_template_outfits");
+
+    if (!result)
+    {
+        sLog->outError(">> Loaded 0 creature outfits. DB table `creature_template_outfits` is empty!");
+        return;
+    }
+
+    uint32 count = 0;
+
+    do
+    {
+        Field* fields = result->Fetch();
+
+        uint32 i = 0;
+        uint32 entry   = fields[i++].GetUInt32();
+
+        if (!CreatureOutfit::IsFake(entry))
+        {
+            sLog->outError(">> Outfit entry %u in `creature_template_outfits` has too low entry (entry <= %u). Ignoring.", entry, CreatureOutfit::max_real_modelid);
+            continue;
+        }
+
+        std::shared_ptr<CreatureOutfit> co(new CreatureOutfit());
+
+        co->id = entry;
+        co->npcsoundsid = fields[i++].GetUInt32();
+        
+        if (co->npcsoundsid && !sNPCSoundsStore.LookupEntry(co->npcsoundsid))
+        {
+            sLog->outError(">> Outfit entry %u in `creature_template_outfits` has incorrect npcsoundsid (%u). Using 0.", entry, co->npcsoundsid);
+            co->npcsoundsid = 0;
+        }
+
+        co->race         = fields[i++].GetUInt8();
+        
+        const ChrRacesEntry* rEntry = sChrRacesStore.LookupEntry(co->race);
+        if (!rEntry)
+        {
+            sLog->outError(">> Outfit entry %u in `creature_template_outfits` has incorrect race (%u).", entry, uint32(co->race));
+            continue;
+        }
+
+        co->Class = fields[i++].GetUInt8();
+        
+        const ChrClassesEntry* cEntry = sChrClassesStore.LookupEntry(co->Class);
+        if (!cEntry)
+        {
+            sLog->outError(">> Outfit entry %u in `creature_template_outfits` has incorrect class (%u).", entry, uint32(co->Class));
+            continue;
+        }
+
+        co->gender       = fields[i++].GetUInt8();
+        
+        switch (co->gender)
+        {
+        case GENDER_FEMALE: co->displayId = rEntry->model_f; break;
+        case GENDER_MALE:   co->displayId = rEntry->model_m; break;
+        default:
+            sLog->outError(">> Outfit entry %u in `creature_template_outfits` has invalid gender %u", entry, uint32(co->gender));
+            continue;
+        }
+
+        co->skin         = fields[i++].GetUInt8();
+        co->face         = fields[i++].GetUInt8();
+        co->hair         = fields[i++].GetUInt8();
+        co->haircolor    = fields[i++].GetUInt8();
+        co->facialhair   = fields[i++].GetUInt8();
+
+        for (EquipmentSlots slot : CreatureOutfit::item_slots)
+        {
+            int32 displayInfo = fields[i++].GetInt32();
+            if (displayInfo > 0) // entry
+            {
+                uint32 item_entry = static_cast<uint32>(displayInfo);
+                if (ItemTemplate const* proto = sObjectMgr->GetItemTemplate(item_entry))
+                    co->outfitdisplays[slot] = proto->DisplayInfoID;
+                else
+                {
+                    sLog->outError(">> Outfit entry %u in `creature_template_outfits` has invalid item entry: %u. Ignoring.", entry, item_entry);
+                    co->outfitdisplays[slot] = 0;
+                }
+            }
+            else // display
+                co->outfitdisplays[slot] = static_cast<uint32>(-displayInfo);
+        }
+
+        co->guild = fields[i++].GetUInt32();
+
+        _creatureOutfitStore[co->id] = std::move(co);
+
+        ++count;
+    }
+    while (result->NextRow());
+
+    sLog->outString(">> Loaded %u creature outfits in %u ms", count, GetMSTimeDiffToNow(oldMSTime));
+}
+
+std::shared_ptr<CreatureOutfit> const& ObjectMgr::GetOutfit(uint32 modelid) const
+{
+    static std::shared_ptr<CreatureOutfit> empty;
+    
+    if (CreatureOutfit::IsFake(modelid))
+    {
+        auto const & outfits = GetCreatureOutfitMap();
+        auto it = outfits.find(modelid);
+        if (it != outfits.end())
+            return it->second;
+    }
+
+    return empty;
+}
+
+uint32 ObjectMgr::GetRealDisplayId(uint32 modelid) const
+{
+    if (std::shared_ptr<CreatureOutfit> outfit = GetOutfit(modelid))
+        return outfit->displayId;
+
+    return modelid;
 }

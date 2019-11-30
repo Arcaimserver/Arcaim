@@ -30,6 +30,8 @@ EndScriptData */
 #include "WardenCheckMgr.h"
 #include "WaypointManager.h"
 #include "GameGraveyard.h"
+#include "Creature.h"
+#include "CreatureOutfit.h"
 
 class reload_commandscript : public CommandScript
 {
@@ -76,6 +78,7 @@ public:
             { "creature_onkill_reputation",   SEC_ADMINISTRATOR, true,  &HandleReloadOnKillReputationCommand,           "" },
             { "creature_queststarter",        SEC_ADMINISTRATOR, true,  &HandleReloadCreatureQuestStarterCommand,       "" },
             { "creature_template",            SEC_ADMINISTRATOR, true,  &HandleReloadCreatureTemplateCommand,           "" },
+            { "creature_template_outfits",    SEC_ADMINISTRATOR, true,  &HandleReloadCreatureTemplateOutfitsCommand,    "" },
             { "disables",                     SEC_ADMINISTRATOR, true,  &HandleReloadDisablesCommand,                   "" },
             { "disenchant_loot_template",     SEC_ADMINISTRATOR, true,  &HandleReloadLootTemplatesDisenchantCommand,    "" },
             { "event_scripts",                SEC_ADMINISTRATOR, true,  &HandleReloadEventScriptsCommand,               "" },
@@ -181,6 +184,7 @@ public:
         HandleReloadReservedNameCommand(handler, "");
         HandleReloadTrinityStringCommand(handler, "");
         HandleReloadGameTeleCommand(handler, "");
+        HandleReloadCreatureTemplateOutfitsCommand(handler, "");
 
         HandleReloadVehicleAccessoryCommand(handler, "");
         HandleReloadVehicleTemplateAccessoryCommand(handler, "");
@@ -517,6 +521,24 @@ public:
         }
 
         handler->SendGlobalGMSysMessage("Creature template reloaded.");
+        return true;
+    }
+
+    static bool HandleReloadCreatureTemplateOutfitsCommand(ChatHandler* handler, const char* /*args*/)
+    {
+        sLog->outString("Loading Creature Outfits... (`creature_template_outfits`)");
+        sObjectMgr->LoadCreatureOutfits();
+        // sMapMgr->DoForAllMaps([](Map* map)
+        // {
+        //     for (auto e : map->GetCreatureBySpawnIdStore())
+        //     {
+        //         auto const & outfit = e.second->GetOutfit();
+        //         if (outfit && outfit->GetId())
+        //             e.second->SetDisplayId(outfit->GetId());
+        //     }
+        // });
+
+        handler->SendGlobalGMSysMessage("DB table `creature_template_outfits` reloaded.");
         return true;
     }
 

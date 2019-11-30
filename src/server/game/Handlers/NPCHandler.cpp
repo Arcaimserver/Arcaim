@@ -42,6 +42,12 @@ void WorldSession::HandleTabardVendorActivateOpcode(WorldPacket & recvData)
     uint64 guid;
     recvData >> guid;
 
+#ifndef DISABLE_DRESSNPCS_CORESOUNDS
+    if (IS_CRE_OR_VEH_OR_PET_GUID(guid))
+        if (Creature* creature = _player->GetMap()->GetCreature(guid))
+            creature->SendMirrorSound(_player, 0);
+#endif
+
     Creature* unit = GetPlayer()->GetNPCIfCanInteractWith(guid, UNIT_NPC_FLAG_TABARDDESIGNER);
     if (!unit)
     {
@@ -74,6 +80,12 @@ void WorldSession::HandleBankerActivateOpcode(WorldPacket & recvData)
 #endif
 
     recvData >> guid;
+
+#ifndef DISABLE_DRESSNPCS_CORESOUNDS
+    if (IS_CRE_OR_VEH_OR_PET_GUID(guid))
+        if (Creature* creature = _player->GetMap()->GetCreature(guid))
+            creature->SendMirrorSound(_player, 0);
+#endif
 
     Creature* unit = GetPlayer()->GetNPCIfCanInteractWith(guid, UNIT_NPC_FLAG_BANKER);
     if (!unit)
@@ -109,8 +121,14 @@ void WorldSession::SendShowMailBox(uint64 guid)
 void WorldSession::HandleTrainerListOpcode(WorldPacket & recvData)
 {
     uint64 guid;
-
     recvData >> guid;
+
+#ifndef DISABLE_DRESSNPCS_CORESOUNDS
+    if (IS_CRE_OR_VEH_OR_PET_GUID(guid))
+        if (Creature* creature = _player->GetMap()->GetCreature(guid))
+            creature->SendMirrorSound(_player, 0);
+#endif
+
     SendTrainerList(guid);
 }
 
@@ -310,6 +328,12 @@ void WorldSession::HandleGossipHelloOpcode(WorldPacket & recvData)
 
     uint64 guid;
     recvData >> guid;
+
+#ifndef DISABLE_DRESSNPCS_CORESOUNDS
+    if (IS_CRE_OR_VEH_OR_PET_GUID(guid))
+        if (Creature* creature = _player->GetMap()->GetCreature(guid))
+            creature->SendMirrorSound(_player, 0);
+#endif
 
     Creature* unit = GetPlayer()->GetNPCIfCanInteractWith(guid, UNIT_NPC_FLAG_NONE);
     if (!unit)
@@ -522,6 +546,12 @@ void WorldSession::HandleListStabledPetsOpcode(WorldPacket & recvData)
     uint64 npcGUID;
 
     recvData >> npcGUID;
+
+#ifndef DISABLE_DRESSNPCS_CORESOUNDS
+    if (IS_CRE_OR_VEH_OR_PET_GUID(npcGUID))
+        if (Creature* creature = _player->GetMap()->GetCreature(npcGUID))
+            creature->SendMirrorSound(_player, 0);
+#endif
 
     if (!CheckStableMaster(npcGUID))
         return;

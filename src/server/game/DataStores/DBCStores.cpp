@@ -9,6 +9,7 @@
 #include "Log.h"
 #include "SharedDefines.h"
 #include "SpellMgr.h"
+#include "ObjectMgr.h"
 #include "TransportMgr.h"
 #include "DBCfmt.h"
 #include "BattlegroundMgr.h"
@@ -58,7 +59,10 @@ DBCStorage <ChatChannelsEntry> sChatChannelsStore(ChatChannelsEntryfmt);
 DBCStorage <ChrClassesEntry> sChrClassesStore(ChrClassesEntryfmt);
 DBCStorage <ChrRacesEntry> sChrRacesStore(ChrRacesEntryfmt);
 DBCStorage <CinematicSequencesEntry> sCinematicSequencesStore(CinematicSequencesEntryfmt);
-DBCStorage <CreatureDisplayInfoEntry> sCreatureDisplayInfoStore(CreatureDisplayInfofmt);
+DBCStorage <CreatureDisplayInfoEntry> sCreatureDisplayInfoStoreRaw(CreatureDisplayInfofmt);
+CreatureDisplayInfoStore sCreatureDisplayInfoStore;
+const CreatureDisplayInfoEntry * CreatureDisplayInfoStore::AssertEntry(uint32 id) const { return sCreatureDisplayInfoStoreRaw.AssertEntry(sObjectMgr->GetRealDisplayId(id)); }
+const CreatureDisplayInfoEntry * CreatureDisplayInfoStore::LookupEntry(uint32 id) const { return sCreatureDisplayInfoStoreRaw.LookupEntry(sObjectMgr->GetRealDisplayId(id)); }
 DBCStorage <CreatureFamilyEntry> sCreatureFamilyStore(CreatureFamilyfmt);
 DBCStorage <CreatureModelDataEntry> sCreatureModelDataStore(CreatureModelDatafmt);
 DBCStorage <CreatureSpellDataEntry> sCreatureSpellDataStore(CreatureSpellDatafmt);
@@ -120,6 +124,8 @@ DBCStorage <MapDifficultyEntry> sMapDifficultyStore(MapDifficultyEntryfmt); // o
 MapDifficultyMap sMapDifficultyMap;
 
 DBCStorage <MovieEntry> sMovieStore(MovieEntryfmt);
+
+DBCStorage<NPCSoundsEntry> sNPCSoundsStore(NPCSoundsEntryfmt);
 
 DBCStorage <OverrideSpellDataEntry> sOverrideSpellDataStore(OverrideSpellDatafmt);
 
@@ -272,7 +278,7 @@ void LoadDBCStores(const std::string& dataPath)
     LoadDBC(availableDbcLocales, bad_dbc_files, sChrClassesStore,             dbcPath, "ChrClasses.dbc");
     LoadDBC(availableDbcLocales, bad_dbc_files, sChrRacesStore,               dbcPath, "ChrRaces.dbc");
     LoadDBC(availableDbcLocales, bad_dbc_files, sCinematicSequencesStore,     dbcPath, "CinematicSequences.dbc");
-    LoadDBC(availableDbcLocales, bad_dbc_files, sCreatureDisplayInfoStore,    dbcPath, "CreatureDisplayInfo.dbc");
+    LoadDBC(availableDbcLocales, bad_dbc_files, sCreatureDisplayInfoStoreRaw,dbcPath, "CreatureDisplayInfo.dbc");
     LoadDBC(availableDbcLocales, bad_dbc_files, sCreatureFamilyStore,         dbcPath, "CreatureFamily.dbc");
     LoadDBC(availableDbcLocales, bad_dbc_files, sCreatureModelDataStore,      dbcPath, "CreatureModelData.dbc");
     LoadDBC(availableDbcLocales, bad_dbc_files, sCreatureSpellDataStore,      dbcPath, "CreatureSpellData.dbc");
@@ -354,7 +360,7 @@ void LoadDBCStores(const std::string& dataPath)
     LoadDBC(availableDbcLocales, bad_dbc_files, sMovieStore,                  dbcPath, "Movie.dbc");
 
     LoadDBC(availableDbcLocales, bad_dbc_files, sOverrideSpellDataStore,      dbcPath, "OverrideSpellData.dbc");
-
+    LoadDBC(availableDbcLocales, bad_dbc_files, sNPCSoundsStore,              dbcPath, "NPCSounds.dbc");
     LoadDBC(availableDbcLocales, bad_dbc_files, sPowerDisplayStore,           dbcPath, "PowerDisplay.dbc");
     LoadDBC(availableDbcLocales, bad_dbc_files, sPvPDifficultyStore,          dbcPath, "PvpDifficulty.dbc");
     for (uint32 i = 0; i < sPvPDifficultyStore.GetNumRows(); ++i)

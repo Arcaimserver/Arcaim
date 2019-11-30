@@ -67,7 +67,8 @@ extern DBCStorage <CharTitlesEntry>              sCharTitlesStore;
 extern DBCStorage <ChrClassesEntry>              sChrClassesStore;
 extern DBCStorage <ChrRacesEntry>                sChrRacesStore;
 extern DBCStorage <CinematicSequencesEntry>      sCinematicSequencesStore;
-extern DBCStorage <CreatureDisplayInfoEntry>     sCreatureDisplayInfoStore;
+extern DBCStorage <CreatureDisplayInfoEntry>     sCreatureDisplayInfoStoreRaw;
+extern CreatureDisplayInfoStore                  sCreatureDisplayInfoStore;
 extern DBCStorage <CreatureFamilyEntry>          sCreatureFamilyStore;
 extern DBCStorage <CreatureModelDataEntry>       sCreatureModelDataStore;
 extern DBCStorage <CreatureSpellDataEntry>       sCreatureSpellDataStore;
@@ -114,6 +115,7 @@ extern DBCStorage <MapEntry>                     sMapStore;
 //extern DBCStorage <MapDifficultyEntry>           sMapDifficultyStore; -- use GetMapDifficultyData insteed
 extern MapDifficultyMap                          sMapDifficultyMap;
 extern DBCStorage <MovieEntry>                   sMovieStore;
+extern DBCStorage <NPCSoundsEntry>               sNPCSoundsStore;
 extern DBCStorage <OverrideSpellDataEntry>       sOverrideSpellDataStore;
 extern DBCStorage <PowerDisplayEntry>            sPowerDisplayStore;
 extern DBCStorage <QuestSortEntry>               sQuestSortStore;

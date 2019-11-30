@@ -20,6 +20,8 @@
 #include "BattlegroundAV.h"
 #include "ScriptMgr.h"
 #include "GameObjectAI.h"
+#include "Map.h"
+
 #ifdef ELUNA
 #include "LuaEngine.h"
 #endif
@@ -74,6 +76,12 @@ void WorldSession::HandleQuestgiverHelloOpcode(WorldPacket & recvData)
 
 #if defined(ENABLE_EXTRAS) && defined(ENABLE_EXTRA_LOGS)
     sLog->outDebug(LOG_FILTER_NETWORKIO, "WORLD: Received CMSG_QUESTGIVER_HELLO npc = %u", GUID_LOPART(guid));
+#endif
+
+#ifndef DISABLE_DRESSNPCS_CORESOUNDS
+    if (IS_CRE_OR_VEH_OR_PET_GUID(guid))
+        if (Creature* creature = _player->GetMap()->GetCreature(guid))
+            creature->SendMirrorSound(_player, 0);
 #endif
 
     Creature* creature = GetPlayer()->GetNPCIfCanInteractWith(guid, UNIT_NPC_FLAG_NONE);

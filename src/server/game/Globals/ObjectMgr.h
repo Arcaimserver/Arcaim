@@ -23,14 +23,16 @@
 #include "Map.h"
 #include "ObjectAccessor.h"
 #include "ObjectDefines.h"
-#include <ace/Singleton.h>
+#include "ConditionMgr.h"
 #include "VehicleDefines.h"
+#include <ace/Singleton.h>
 #include <string>
 #include <map>
 #include <limits>
-#include "ConditionMgr.h"
 #include <functional>
+#include <memory>
 
+class CreatureOutfit;
 class Item;
 struct AccessRequirement;
 struct PlayerClassInfo;
@@ -715,6 +717,8 @@ class ObjectMgr
 
         typedef std::map<uint32, uint32> CharacterConversionMap;
 
+        typedef std::unordered_map<uint32, std::shared_ptr<CreatureOutfit>> CreatureOutfitContainer;
+
         Player* GetPlayerByLowGUID(uint32 lowguid) const;
 
         GameObjectTemplate const* GetGameObjectTemplate(uint32 entry);
@@ -1264,6 +1268,11 @@ class ObjectMgr
         bool AddGameTele(GameTele& data);
         bool DeleteGameTele(std::string const& name);
 
+        const CreatureOutfitContainer& GetCreatureOutfitMap() const { return _creatureOutfitStore; }
+        std::shared_ptr<CreatureOutfit> const & GetOutfit(uint32 modelid) const;
+        uint32 GetRealDisplayId(uint32 modelid) const;
+        void LoadCreatureOutfits();
+
         TrainerSpellData const* GetNpcTrainerSpells(uint32 entry) const
         {
             CacheTrainerSpellContainer::const_iterator  iter = _cacheTrainerSpellStore.find(entry);
@@ -1410,6 +1419,8 @@ class ObjectMgr
 
         PageTextContainer _pageTextStore;
         InstanceTemplateContainer _instanceTemplateStore;
+
+        CreatureOutfitContainer _creatureOutfitStore;
 
     private:
         void LoadScripts(ScriptsType type);

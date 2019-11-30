@@ -14,6 +14,7 @@
 #include "Player.h"
 #include "UpdateMask.h"
 #include "WaypointMovementGenerator.h"
+#include "Map.h"
 
 void WorldSession::HandleTaxiNodeStatusQueryOpcode(WorldPacket & recvData)
 {
@@ -66,6 +67,12 @@ void WorldSession::HandleTaxiQueryAvailableNodes(WorldPacket & recvData)
 
     uint64 guid;
     recvData >> guid;
+
+#ifndef DISABLE_DRESSNPCS_CORESOUNDS
+    if (IS_CRE_OR_VEH_OR_PET_GUID(guid))
+        if (Creature* creature = _player->GetMap()->GetCreature(guid))
+            creature->SendMirrorSound(_player, 0);
+#endif
 
     // cheating checks
     Creature* unit = GetPlayer()->GetNPCIfCanInteractWith(guid, UNIT_NPC_FLAG_FLIGHTMASTER);

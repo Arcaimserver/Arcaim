@@ -15,6 +15,8 @@
 #include "Guild.h"
 #include "GossipDef.h"
 #include "SocialMgr.h"
+#include "Creature.h"
+#include "Map.h"
 
 void WorldSession::HandleGuildQueryOpcode(WorldPacket& recvPacket)
 {
@@ -356,6 +358,12 @@ void WorldSession::HandleGuildBankerActivate(WorldPacket& recvData)
     uint64 guid;
     bool sendAllSlots;
     recvData >> guid >> sendAllSlots;
+
+#ifndef DISABLE_DRESSNPCS_CORESOUNDS
+    if (IS_CRE_OR_VEH_OR_PET_GUID(guid))
+        if (Creature* creature = _player->GetMap()->GetCreature(guid))
+            creature->SendMirrorSound(_player, 0);
+#endif
 
 #if defined(ENABLE_EXTRAS) && defined(ENABLE_EXTRA_LOGS)
     sLog->outDebug(LOG_FILTER_GUILD, "CMSG_GUILD_BANKER_ACTIVATE [%s]: Go: [" UI64FMTD "] AllSlots: %u"

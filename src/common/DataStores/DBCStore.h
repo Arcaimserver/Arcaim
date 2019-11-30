@@ -84,6 +84,8 @@ class DBCStorage
             return (id >= nCount) ? NULL : indexTable.asT[id];
         }
 
+        T const* AssertEntry(uint32 id) const { return ASSERT_NOTNULL(LookupEntry(id)); }
+
 #ifdef ELUNA
         void SetEntry(uint32 id, T* t)
         {

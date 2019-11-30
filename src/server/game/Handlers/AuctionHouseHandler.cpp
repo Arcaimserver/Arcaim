@@ -9,7 +9,7 @@
 #include "World.h"
 #include "WorldPacket.h"
 #include "WorldSession.h"
-
+#include "Map.h"
 #include "AuctionHouseMgr.h"
 #include "Log.h"
 #include "Language.h"
@@ -25,6 +25,12 @@ void WorldSession::HandleAuctionHelloOpcode(WorldPacket & recvData)
 {
     uint64 guid;                                            //NPC guid
     recvData >> guid;
+
+#ifndef DISABLE_DRESSNPCS_CORESOUNDS
+    if (IS_CRE_OR_VEH_OR_PET_GUID(guid))
+        if (Creature* creature = _player->GetMap()->GetCreature(guid))
+            creature->SendMirrorSound(_player, 0);
+#endif
 
     Creature* unit = GetPlayer()->GetNPCIfCanInteractWith(guid, UNIT_NPC_FLAG_AUCTIONEER);
     if (!unit)

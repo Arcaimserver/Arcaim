@@ -19,6 +19,7 @@
 #include "GossipDef.h"
 #include "SocialMgr.h"
 #include "PetitionMgr.h"
+#include "Map.h"
 
 #define CHARTER_DISPLAY_ID 16161
 
@@ -871,6 +872,12 @@ void WorldSession::HandlePetitionShowListOpcode(WorldPacket & recvData)
 
     uint64 guid;
     recvData >> guid;
+
+#ifndef DISABLE_DRESSNPCS_CORESOUNDS
+    if (IS_CRE_OR_VEH_OR_PET_GUID(guid))
+        if (Creature* creature = _player->GetMap()->GetCreature(guid))
+            creature->SendMirrorSound(_player, 0);
+#endif
 
     SendPetitionShowList(guid);
 }

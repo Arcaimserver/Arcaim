@@ -14,11 +14,11 @@
 #include "LootMgr.h"
 #include "DatabaseEnv.h"
 #include "Cell.h"
-
 #include <list>
+#include <memory>
 
+class CreatureOutfit;
 class SpellInfo;
-
 class CreatureAI;
 class Quest;
 class Player;
@@ -438,6 +438,14 @@ class Creature : public Unit, public GridObject<Creature>, public MovableMapObje
         void SetObjectScale(float scale);
         void SetDisplayId(uint32 modelId);
 
+        uint32 GetDisplayId() override;
+        void SetDisplayIdRaw(uint32 modelId);
+
+        std::shared_ptr<CreatureOutfit> & GetOutfit() { return m_outfit; };
+        void SetOutfit(std::shared_ptr<CreatureOutfit> const & outfit);
+        void SetMirrorImageFlag(bool on) { if (on) SetFlag(UNIT_FIELD_FLAGS_2, UNIT_FLAG2_MIRROR_IMAGE); else RemoveFlag(UNIT_FIELD_FLAGS_2, UNIT_FLAG2_MIRROR_IMAGE); };
+        void SendMirrorSound(Player* target, uint8 type);
+
         void DisappearAndDie();
 
         bool Create(uint32 guidlow, Map* map, uint32 phaseMask, uint32 Entry, uint32 vehId, float x, float y, float z, float ang, const CreatureData* data = NULL);
@@ -713,6 +721,8 @@ class Creature : public Unit, public GridObject<Creature>, public MovableMapObje
         void SetTarget(uint64 guid);
         void FocusTarget(Spell const* focusSpell, WorldObject const* target);
         void ReleaseFocus(Spell const* focusSpell);
+
+        std::shared_ptr<CreatureOutfit> m_outfit;
 
         // Part of Evade mechanics
         time_t GetLastDamagedTime() const { return _lastDamagedTime; }

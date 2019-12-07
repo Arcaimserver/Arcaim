@@ -136,6 +136,14 @@ struct SpellCooldown
 typedef std::map<uint32, SpellCooldown> SpellCooldowns;
 typedef std::unordered_map<uint32 /*instanceId*/, time_t/*releaseTime*/> InstanceTimeMap;
 
+struct ReforgeData
+{
+    uint32 increase, decrease;
+    int32 stat_value;
+};
+
+typedef std::unordered_map<uint32, ReforgeData> ReforgeMapType;
+
 enum TrainerSpellState
 {
     TRAINER_SPELL_GREEN = 0,
@@ -2627,6 +2635,8 @@ class Player : public Unit, public GridObject<Player>
         const PlayerTalentMap& GetTalentMap() const { return m_talents; }
         uint32 GetNextSave() const { return m_nextSave; }
         SpellModList const& GetSpellModList(uint32 type) const { return m_spellMods[type]; }
+
+        ReforgeMapType reforgeMap; // reforgeMap[iGUID] = ReforgeData
 
     protected:
         // Gamemaster whisper whitelist

@@ -2,7 +2,6 @@
  *  Copyright (С) since 2019 Andrei Guluaev (Winfidonarleyan/Kargatum) https://github.com/Winfidonarleyan 
 */
 
-#include "NpcProfessions.h"
 #include "ScriptMgr.h"
 #include "Log.h"
 

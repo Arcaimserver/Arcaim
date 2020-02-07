@@ -15550,9 +15550,15 @@ bool Unit::IsPolymorphed() const
 void Unit::SetDisplayId(uint32 modelId)
 {
     SetUInt32Value(UNIT_FIELD_DISPLAYID, modelId);
+    
     // Set Gender by modelId
     if (CreatureModelInfo const* minfo = sObjectMgr->GetCreatureModelInfo(modelId))
-        SetByteValue(UNIT_FIELD_BYTES_0, 2, minfo->gender);
+	{
+		if (GetTypeId() == TYPEID_PLAYER)
+            SetGender(GetGender());
+        else
+            SetGender(minfo->gender);
+	}
 }
 
 void Unit::RestoreDisplayId()

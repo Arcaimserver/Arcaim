@@ -15549,10 +15549,10 @@ void Unit::SetDisplayId(uint32 modelId)
     // Set Gender by modelId
     if (CreatureModelInfo const* minfo = sObjectMgr->GetCreatureModelInfo(modelId))
 	{
-		if (GetTypeId() == TYPEID_PLAYER)
-            SetGender(GetGender());
+        if (GetTypeId() == TYPEID_PLAYER)
+            SetByteValue(UNIT_FIELD_BYTES_0, 2, GetByteValue(UNIT_FIELD_BYTES_0, 2));
         else
-            SetGender(minfo->gender);
+            SetByteValue(UNIT_FIELD_BYTES_0, 2, minfo->gender);
 	}
 }
 

@@ -18,6 +18,11 @@
 #include "Creature.h"
 #include "Map.h"
 
+// Cleanup bad characters
+void cleanStr(std::string &str) {
+    str.erase(remove(str.begin(), str.end(), '|'), str.end());
+}
+
 void WorldSession::HandleGuildQueryOpcode(WorldPacket& recvPacket)
 {
     uint32 guildId;
@@ -182,6 +187,13 @@ void WorldSession::HandleGuildMOTDOpcode(WorldPacket& recvPacket)
     sLog->outDebug(LOG_FILTER_GUILD, "CMSG_GUILD_MOTD [%s]: MOTD: %s", GetPlayerInfo().c_str(), motd.c_str());
 #endif
 
+    // Check for overflow
+    if (motd.length() > 128)
+        return;
+
+    // Cleanup bad characters
+    cleanStr(motd);
+
     if (Guild* guild = GetPlayer()->GetGuild())
         guild->HandleSetMOTD(this, motd);
 }
@@ -195,6 +207,14 @@ void WorldSession::HandleGuildSetPublicNoteOpcode(WorldPacket& recvPacket)
 #if defined(ENABLE_EXTRAS) && defined(ENABLE_EXTRA_LOGS)
     sLog->outDebug(LOG_FILTER_GUILD, "CMSG_GUILD_SET_PUBLIC_NOTE [%s]: Target: %s, Note: %s", GetPlayerInfo().c_str(), playerName.c_str(), note.c_str());
 #endif
+
+    // Check for overflow
+    if (note.length() > 31)
+        return;
+
+    // Cleanup bad characters
+    cleanStr(note);
+
     if (normalizePlayerName(playerName))
         if (Guild* guild = GetPlayer()->GetGuild())
             guild->HandleSetMemberNote(this, playerName, note, true);
@@ -210,6 +230,14 @@ void WorldSession::HandleGuildSetOfficerNoteOpcode(WorldPacket& recvPacket)
     sLog->outDebug(LOG_FILTER_GUILD, "CMSG_GUILD_SET_OFFICER_NOTE [%s]: Target: %s, Note: %s",
          GetPlayerInfo().c_str(), playerName.c_str(), note.c_str());
 #endif
+
+    // Check for overflow
+    if (note.length() > 31)
+        return;
+
+    // Cleanup bad characters
+    cleanStr(note);
+
     if (normalizePlayerName(playerName))
         if (Guild* guild = GetPlayer()->GetGuild())
             guild->HandleSetMemberNote(this, playerName, note, false);
@@ -240,6 +268,13 @@ void WorldSession::HandleGuildRankOpcode(WorldPacket& recvPacket)
         return;
     }
 
+    // Check for overflow
+    if (rankName.length() > 15)
+        return;
+
+    // Cleanup bad characters
+    cleanStr(rankName);
+
     GuildBankRightsAndSlotsVec rightsAndSlots(GUILD_BANK_MAX_TABS);
 
     for (uint8 tabId = 0; tabId < GUILD_BANK_MAX_TABS; ++tabId)
@@ -265,6 +300,13 @@ void WorldSession::HandleGuildAddRankOpcode(WorldPacket& recvPacket)
     sLog->outDebug(LOG_FILTER_GUILD, "CMSG_GUILD_ADD_RANK [%s]: Rank: %s", GetPlayerInfo().c_str(), rankName.c_str());
 #endif
 
+    // Check for overflow
+    if (rankName.length() > 15)
+        return;
+
+    // Cleanup bad characters
+    cleanStr(rankName);
+
     if (Guild* guild = GetPlayer()->GetGuild())
         guild->HandleAddNewRank(this, rankName);
 }
@@ -287,6 +329,13 @@ void WorldSession::HandleGuildChangeInfoTextOpcode(WorldPacket& recvPacket)
 #if defined(ENABLE_EXTRAS) && defined(ENABLE_EXTRA_LOGS)
     sLog->outDebug(LOG_FILTER_GUILD, "CMSG_GUILD_INFO_TEXT [%s]: %s", GetPlayerInfo().c_str(), info.c_str());
 #endif
+
+    // Check for overflow
+    if (info.length() > 500)
+        return;
+
+    // Cleanup bad characters
+    cleanStr(info);
 
     if (Guild* guild = GetPlayer()->GetGuild())
         guild->HandleSetInfo(this, info);
@@ -540,6 +589,14 @@ void WorldSession::HandleGuildBankUpdateTab(WorldPacket& recvData)
     sLog->outDebug(LOG_FILTER_GUILD, "CMSG_GUILD_BANK_UPDATE_TAB [%s]: Go: [" UI64FMTD "], TabId: %u, Name: %s, Icon: %s"
         , GetPlayerInfo().c_str(), guid, tabId, name.c_str(), icon.c_str());
 #endif
+
+    // Check for overflow
+    if (name.length() > 16 || icon.length() > 128)
+        return;
+
+    // Cleanup bad characters
+    cleanStr(name);
+
     if (!name.empty() && !icon.empty())
         if (GetPlayer()->GetGameObjectIfCanInteractWith(guid, GAMEOBJECT_TYPE_GUILD_BANK))
             if (Guild* guild = GetPlayer()->GetGuild())
@@ -581,6 +638,13 @@ void WorldSession::HandleSetGuildBankTabText(WorldPacket &recvData)
 #if defined(ENABLE_EXTRAS) && defined(ENABLE_EXTRA_LOGS)
     sLog->outDebug(LOG_FILTER_GUILD, "CMSG_SET_GUILD_BANK_TEXT [%s]: TabId: %u, Text: %s", GetPlayerInfo().c_str(), tabId, text.c_str());
 #endif
+
+    // Check for overflow
+    if (text.length() > 500)
+        return;
+
+    // Cleanup bad characters
+    cleanStr(text);
 
     if (Guild* guild = GetPlayer()->GetGuild())
         guild->SetBankTabText(tabId, text);

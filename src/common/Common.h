@@ -135,6 +135,8 @@ inline unsigned long long atoull(char const* str) { return strtoull(str, nullptr
 
 #define STRINGIZE(a) #a
 
+#define MAX_NETCLIENT_PACKET_SIZE (32767 - 1)               // Client hardcap: int16 with trailing zero space otherwise crash on memory free
+
 enum TimeConstants
 {
     MINUTE          = 60,

@@ -14891,8 +14891,8 @@ void Player::PrepareGossipMenu(WorldObject* source, uint32 menuId /*= 0*/, bool 
                     break;
                 case GOSSIP_OPTION_VENDOR:
                 {
-                    VendorItemData const* vendorItems = itr->second.ActionMenuID ? nullptr : creature->GetVendorItems();
-                    if (!itr->second.ActionMenuID && (!vendorItems || vendorItems->Empty()))
+                    VendorItemData const* vendorItems = itr->second.ActionMenuID ? sObjectMgr->GetNpcVendorItemList(itr->second.ActionMenuID) : creature->GetVendorItems();
+                    if (!vendorItems || vendorItems->Empty())
                     {
                         sLog->outErrorDb("Creature %u (Entry: %u) have UNIT_NPC_FLAG_VENDOR but have empty trading item list.", creature->GetGUIDLow(), creature->GetEntry());
                         canTalk = false;
@@ -16341,7 +16341,7 @@ bool Player::SatisfyQuestStatus(Quest const* qInfo, bool msg) const
 
 bool Player::SatisfyQuestConditions(Quest const* qInfo, bool msg)
 {
-    ConditionList conditions = sConditionMgr->GetConditionsForNotGroupedEntry(CONDITION_SOURCE_TYPE_QUEST_ACCEPT, qInfo->GetQuestId());
+    ConditionList conditions = sConditionMgr->GetConditionsForNotGroupedEntry(CONDITION_SOURCE_TYPE_QUEST_AVAILABLE, qInfo->GetQuestId());
     if (!sConditionMgr->IsObjectMeetToConditions(this, conditions))
     {
         if (msg)
@@ -22121,9 +22121,7 @@ bool Player::BuyItemFromVendorSlot(uint64 vendorguid, uint32 vendorslot, uint32 
         return false;
     }
 
-    uint32 currentVendor = GetSession()->GetCurrentVendor();
-
-    VendorItemData const* vItems = currentVendor ? sObjectMgr->GetNpcVendorItemList(currentVendor) : creature->GetVendorItems();
+    VendorItemData const* vItems = GetSession()->GetCurrentVendor() ? sObjectMgr->GetNpcVendorItemList(GetSession()->GetCurrentVendor()) : creature->GetVendorItems();
     if (!vItems || vItems->Empty())
     {
         SendBuyError(BUY_ERR_CANT_FIND_ITEM, creature, item, 0);

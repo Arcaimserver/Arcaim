@@ -8542,7 +8542,8 @@ bool ObjectMgr::IsVendorItemValid(uint32 vendor_entry, uint32 item_id, int32 max
                 skip_vendors->insert(vendor_entry);
         }
         return false;
-    }*/
+    }
+    */
 
     if (!sObjectMgr->GetItemTemplate(item_id))
     {

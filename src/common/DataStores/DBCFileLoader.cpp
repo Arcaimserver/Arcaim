@@ -85,7 +85,7 @@ bool DBCFileLoader::Load(const char* filename, const char* fmt)
     }
 
     data = new unsigned char[recordSize * recordCount + stringSize];
-    stringTable = data + recordSize*recordCount;
+    stringTable = data + recordSize * recordCount;
 
     if (fread(data, recordSize * recordCount + stringSize, 1, f) != 1)
     {
@@ -216,7 +216,7 @@ char* DBCFileLoader::AutoProduceData(const char* format, uint32& records, char**
         else
             indexTable[y] = &dataTable[offset];
 
-        for (uint32 x=0; x < fieldCount; ++x)
+        for (uint32 x = 0; x < fieldCount; ++x)
         {
             switch (format[x])
             {
@@ -283,10 +283,6 @@ char* DBCFileLoader::AutoProduceStrings(const char* format, char* dataTable)
                     offset += sizeof(uint8);
                     break;
                 case FT_STRING:
-                {
-                    // fill only not filled entries
-                    char** slot = (char**)(&dataTable[offset]);
-                    if (!*slot || !**slot)
                     {
                         const char * st = getRecord(y).getString(x);
                         *slot=stringPool+(st-(const char*)stringTable);
